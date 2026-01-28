@@ -6,14 +6,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Inicializar Firebase Admin
+// ================================
+// 🔥 FIREBASE ADMIN (PROD READY)
+// ================================
+const serviceAccount = {
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+};
+
 admin.initializeApp({
-  credential: admin.credential.cert(
-    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  ),
+  credential: admin.credential.cert(serviceAccount),
 });
 
-// Endpoint para enviar push
+// ================================
+// 🚀 SEND PUSH
+// ================================
 app.post("/send-push", async (req, res) => {
   try {
     const { token, title, body, data } = req.body;
@@ -28,16 +36,17 @@ app.post("/send-push", async (req, res) => {
       data: data || {},
     });
 
-    return res.json({ ok: true });
-
+    res.json({ ok: true });
   } catch (err) {
     console.error("Push error:", err);
-    return res.status(500).json({ error: "Push failed" });
+    res.status(500).json({ error: "Push failed" });
   }
 });
 
-// Health check
-app.get("/", (req, res) => {
+// ================================
+// ❤️ HEALTH CHECK
+// ================================
+app.get("/", (_, res) => {
   res.send("☕ Cafecortero Push Server running");
 });
 
